@@ -2,12 +2,12 @@ import streamlit as st
 import os
 import base64
 import tempfile
-from PIL import image
+from PIL import Image
 import numpy as np
-from moviepy.editor import videofileclip
+from moviepy.editor import VideoFileClip
 import moviepy.video.fx.all as vfx
 
-## session state ##
+## Session state ##
 if 'clip_width' not in st.session_state:
     st.session_state.clip_width = 0
 if 'clip_height' not in st.session_state:
@@ -20,85 +20,85 @@ if 'clip_total_frames' not in st.session_state:
     st.session_state.clip_total_frames = 0  
 
 st.set_page_config(
-    page_title="video to animated gif",
+    page_title="Video to Animated GIF",
     layout="wide",
     page_icon="🎈",
     menu_items={
-        "get help": "https://github.com/chaganti-reddy/video-animated-gif",
-        "report a bug": "https://github.com/chaganti-reddy/video-animated-gif/issues",
-        "about": "video to animated gif's using *python & streamlit*",
+        "Get Help": "https://github.com/Chaganti-Reddy/video-animated-gif",
+        "Report a bug": "https://github.com/Chaganti-Reddy/video-animated-gif/issues",
+        "About": "Video to Animated GIF's using *Python & Streamlit*",
     },
 )
     
-st.title('🎈 animated gif maker')
+st.title('🎈 Animated GIF Maker')
 
-## upload file ##
-st.sidebar.header('upload file')
-uploaded_file = st.sidebar.file_uploader("choose a file", type=['mov', 'mp4'])
+## Upload file ##
+st.sidebar.header('Upload file')
+uploaded_file = st.sidebar.file_uploader("Choose a file", type=['mov', 'mp4'])
 st.sidebar.markdown('''
-[download example file](https://github.com/chaganti-reddy/video-animated-gif/blob/main/example/streamlit-app-starter-kit-screencast.mov)
+[Download example file](https://github.com/Chaganti-Reddy/video-animated-gif/blob/main/example/streamlit-app-starter-kit-screencast.mov)
 
 ---
-made with ❤️ by venkatarami reddy ([chaganti reddy](https://github.com/chaganti-reddy))
+Made with ❤️ by Venkatarami Reddy ([Chaganti Reddy](https://github.com/Chaganti-Reddy))
 ''')
 
-## display gif generation parameters once file has been uploaded ##
-if uploaded_file is not none:
-  ## save to temp file ##
-  tfile = tempfile.namedtemporaryfile(delete=false) 
+## Display gif generation parameters once file has been uploaded ##
+if uploaded_file is not None:
+  ## Save to temp file ##
+  tfile = tempfile.NamedTemporaryFile(delete=False) 
   tfile.write(uploaded_file.read())
   
-  ## open file ##
-  clip = videofileclip(tfile.name)
+  ## Open file ##
+  clip = VideoFileClip(tfile.name)
     
   st.session_state.clip_duration = clip.duration
   
-  ## input widgets ##
-  st.sidebar.header('input parameters')
-  selected_resolution_scaling = st.sidebar.slider('scaling of video resolution', 0.0, 1.0, 0.5 )
-  selected_speedx = st.sidebar.slider('playback speed', 0.1, 10.0, 5.0)
-  selected_export_range = st.sidebar.slider('duration range to export', 0, int(st.session_state.clip_duration), (0, int(st.session_state.clip_duration) ))
+  ## Input widgets ##
+  st.sidebar.header('Input parameters')
+  selected_resolution_scaling = st.sidebar.slider('Scaling of video resolution', 0.0, 1.0, 0.5 )
+  selected_speedx = st.sidebar.slider('Playback speed', 0.1, 10.0, 5.0)
+  selected_export_range = st.sidebar.slider('Duration range to export', 0, int(st.session_state.clip_duration), (0, int(st.session_state.clip_duration) ))
     
-  ## resizing of video ##
+  ## Resizing of video ##
   clip = clip.resize(selected_resolution_scaling)
      
   st.session_state.clip_width = clip.w
   st.session_state.clip_height = clip.h
   st.session_state.clip_duration = clip.duration
   st.session_state.clip_total_frames = clip.duration * clip.fps
-  st.session_state.clip_fps = st.sidebar.slider('fps', 10, 60, 20)
+  st.session_state.clip_fps = st.sidebar.slider('FPS', 10, 60, 20)
     
-  ## display output ##
-  st.subheader('metrics')
+  ## Display output ##
+  st.subheader('Metrics')
   col1, col2, col3, col4, col5 = st.columns(5)
-  col1.metric('width', st.session_state.clip_width, 'pixels')
-  col2.metric('height', st.session_state.clip_height, 'pixels')
-  col3.metric('duration', st.session_state.clip_duration, 'seconds')
-  col4.metric('fps', st.session_state.clip_fps, '')
-  col5.metric('total frames', st.session_state.clip_total_frames, 'frames')
+  col1.metric('Width', st.session_state.clip_width, 'pixels')
+  col2.metric('Height', st.session_state.clip_height, 'pixels')
+  col3.metric('Duration', st.session_state.clip_duration, 'seconds')
+  col4.metric('FPS', st.session_state.clip_fps, '')
+  col5.metric('Total Frames', st.session_state.clip_total_frames, 'frames')
 
-  # extract video frame as a display image
-  st.subheader('preview')
+  # Extract video frame as a display image
+  st.subheader('Preview')
 
-  with st.expander('show image'):
-    selected_frame = st.slider('preview a time frame (s)', 0, int(st.session_state.clip_duration), int(np.median(st.session_state.clip_duration)) )
+  with st.expander('Show image'):
+    selected_frame = st.slider('Preview a time frame (s)', 0, int(st.session_state.clip_duration), int(np.median(st.session_state.clip_duration)) )
     clip.save_frame('frame.gif', t=selected_frame)
-    frame_image = image.open('frame.gif')
+    frame_image = Image.open('frame.gif')
     st.image(frame_image)
 
-  ## print image parameters ##
-  st.subheader('image parameters')
-  with st.expander('show image parameters'):
-    st.write(f'file name: `{uploaded_file.name}`')
-    st.write('image size:', frame_image.size)
-    st.write('video resolution scaling', selected_resolution_scaling)
-    st.write('speed playback:', selected_speedx)
-    st.write('export duration:', selected_export_range)
-    st.write('frames per second (fps):', st.session_state.clip_fps)
+  ## Print image parameters ##
+  st.subheader('Image parameters')
+  with st.expander('Show image parameters'):
+    st.write(f'File name: `{uploaded_file.name}`')
+    st.write('Image size:', frame_image.size)
+    st.write('Video resolution scaling', selected_resolution_scaling)
+    st.write('Speed playback:', selected_speedx)
+    st.write('Export duration:', selected_export_range)
+    st.write('Frames per second (FPS):', st.session_state.clip_fps)
     
-  ## export animated gif ##
-  st.subheader('generate gif')
-  generate_gif = st.button('generate animated gif')
+  ## Export animated GIF ##
+  st.subheader('Generate GIF')
+  generate_gif = st.button('Generate Animated GIF')
   
   if generate_gif:
     clip = clip.subclip(selected_export_range[0], selected_export_range[1]).speedx(selected_speedx)
@@ -110,15 +110,15 @@ if uploaded_file is not none:
     image_list = []
 
     for frame in frames:
-        im = image.fromarray(frame)
+        im = Image.fromarray(frame)
         image_list.append(im)
 
-    image_list[0].save('export.gif', format = 'gif', save_all = true, loop = 0, append_images = image_list)
+    image_list[0].save('export.gif', format = 'GIF', save_all = True, loop = 0, append_images = image_list)
     
     #clip.write_gif('export.gif', fps=st.session_state.clip_fps)
     
-    ## download ##
-    st.subheader('download')
+    ## Download ##
+    st.subheader('Download')
     
     #video_file = open('export.gif', 'rb')
     #video_bytes = video_file.read()
@@ -130,21 +130,21 @@ if uploaded_file is not none:
     file_.close()
     st.markdown(
         f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-        unsafe_allow_html=true,
+        unsafe_allow_html=True,
     )
     
     fsize = round(os.path.getsize('export.gif')/(1024*1024), 1)
-    st.info(f'file size of generated gif: {fsize} mb', icon='💾')
+    st.info(f'File size of generated GIF: {fsize} MB', icon='💾')
     
     fname = uploaded_file.name.split('.')[0]
     with open('export.gif', 'rb') as file:
       btn = st.download_button(
-            label='download image',
+            label='Download image',
             data=file,
             file_name=f'{fname}_scaling-{selected_resolution_scaling}_fps-{st.session_state.clip_fps}_speed-{selected_speedx}_duration-{selected_export_range[0]}-{selected_export_range[1]}.gif',
             mime='image/gif'
           )
 
-## default page ##
+## Default page ##
 else:
-  st.warning('👈 upload a video file')
+  st.warning('👈 Upload a video file')
