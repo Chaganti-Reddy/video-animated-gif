@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import base64
 import tempfile
-from pil import image
+from PIL import image
 import numpy as np
 from moviepy.editor import videofileclip
 import moviepy.video.fx.all as vfx
